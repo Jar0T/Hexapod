@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HexapodController.Views.BleDevicesPage"
+             xmlns:vm="clr-namespace:HexapodController.ViewModels" xmlns:customcontrols="clr-namespace:HexapodController.CustomControls"
+             Title="{Binding Title}">
+
+    <ContentPage.BindingContext>
+        <vm:BleDevicesViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <Button x:Name="btnScan"
+                    Command="{Binding BleScanCommand}"
+                    IsEnabled="{Binding ScanEnabled}"
+                    Text="Scan"/>
+            <ListView x:Name="lvBleDevices" ItemsSource="{Binding BleDevices}" SeparatorVisibility="Default" SeparatorColor="Black">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="2*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="9*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Text="{Binding Name}" Grid.Row="0" TextColor="Black"/>
+                                <Label Text="{Binding Id}" Grid.Row="1" TextColor="DarkSlateGray" FontSize="Micro"/>
+                                <Label Text="{Binding Rssi}" Grid.Column="1" Grid.RowSpan="2" TextColor="Black"/>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                          Command="{Binding Source={RelativeSource AncestorType={Type vm:BleDevicesViewModel}}, Path=DeviceSelectedCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
