@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 pico_sdk_init()
 
-add_executable(Hexapod
+add_executable(${PROJECT_NAME}
     main.cpp
     src/BLE/BLE.cpp
     src/helpers/helpers.cpp
@@ -22,29 +22,32 @@ add_executable(Hexapod
     src/Common/Leg.cpp
     src/RCData/RCData.cpp
     src/TimeInfo/TimeInfo.cpp
+    src/Hexapod/Hexapod.cpp
+    src/common/States/InitState/InitState.cpp
+    src/common/ServoDrivers.cpp
 )
 
 # Add pico_stdlib library, add more if used
-target_link_libraries(Hexapod
+target_link_libraries(${PROJECT_NAME}
     pico_stdlib
     hardware_i2c
     pico_btstack_ble
     pico_btstack_cyw43
     pico_cyw43_arch_none
+    ${CMAKE_SOURCE_DIR}/libs/pca9685/libpca9685.a
 )
-target_link_libraries(Hexapod ${CMAKE_SOURCE_DIR}/libs/pca9685/libpca9685.a)
 
-target_include_directories(Hexapod PRIVATE
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR} # For btstack config
 )
-pico_btstack_make_gatt_header(Hexapod PRIVATE "${CMAKE_CURRENT_LIST_DIR}/ble_hexapod.gatt")
+pico_btstack_make_gatt_header(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/ble_hexapod.gatt")
 
 include_directories(headers)
 include_directories(${CMAKE_SOURCE_DIR}/libs/pca9685/include)
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(Hexapod 1)
-pico_enable_stdio_uart(Hexapod 0)
+pico_enable_stdio_usb(${PROJECT_NAME} 1)
+pico_enable_stdio_uart(${PROJECT_NAME} 0)
 
 # Need to generate UF2 file for upload to RP2040
-pico_add_extra_outputs(Hexapod)
+pico_add_extra_outputs(${PROJECT_NAME})
