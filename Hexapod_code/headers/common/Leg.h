@@ -5,6 +5,13 @@
 #include "pca9685.h"
 #include <array>
 
+enum LegState {
+    LegInit,
+    LegIdle,
+    LegStance,
+    LegSwing
+};
+
 struct Joint {
     float length;
     float minAngle;
@@ -20,6 +27,7 @@ struct Leg {
     Servo femurServo;
     Joint tibia;
     Servo tibiaServo;
+    LegState state = LegState::LegInit;
 };
 
 std::array<Leg, 6> init_legs();

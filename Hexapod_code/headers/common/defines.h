@@ -178,3 +178,8 @@
 #define TIBIA6_SERVO_MAX_ANGLE 150
 #define TIBIA6_SERVO_MIN_PWM 442
 #define TIBIA6_SERVO_MAX_PWM 220
+
+// default distance from center to end effector in xy plane
+#define DEFAULT_RADIUS 280
+// default height of hexapod
+#define DEFAULT_HEIGHT 70

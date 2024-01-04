@@ -7,7 +7,7 @@ TimeInfo &TimeInfo::getInstance() {
 }
 
 void TimeInfo::update() {
-    previousTime = currentTime;
+    // previousTime = currentTime;
     currentTime = time_us_64();
-    deltaTime = currentTime - previousTime;
+    // deltaTime = currentTime - previousTime;
 }
