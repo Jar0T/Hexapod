@@ -182,4 +182,4 @@
 // default distance from center to end effector in xy plane
 #define DEFAULT_RADIUS 280
 // default height of hexapod
-#define DEFAULT_HEIGHT 70
+#define DEFAULT_HEIGHT 100

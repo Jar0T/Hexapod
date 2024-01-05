@@ -46,7 +46,6 @@ Vector3 IKSolve(Vector3 endEffector, Leg leg) {
     gamma = acos(temp);
     float theta3 = M_PI - gamma;
     if (!isInRange(theta3, leg.tibia.minAngle, leg.tibia.maxAngle)) {
-        printf("%d\n", leg.legNumber);
         std::ostringstream oss;
         oss << "Theta 3 was out of range with value " << theta3 << " for leg " << leg.legNumber << " and point (" << endEffector.x << ", " << endEffector.y << ", " << endEffector.z << ")";
         throw std::out_of_range(oss.str());

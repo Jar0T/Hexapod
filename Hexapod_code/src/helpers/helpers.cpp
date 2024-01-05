@@ -1,5 +1,6 @@
 #include "helpers/helpers.h"
 #include "math.h"
+#include <stdio.h>
 
 Vector2 polar_to_cartesian(Vector2 polarCoordinates) {
     return {

@@ -4,14 +4,14 @@
 #include <cstdint>
 
 struct Move {
-    uint8_t legNumber;
-    uint64_t startTime;
-    uint64_t endTime;
-    uint64_t duration;
-    Vector3 startPoint;
-    Vector3 endPoint;
-    Vector3 currentPoint;
-    Vector3 ctrlPoint1;
-    Vector3 ctrlPoint2;
+    uint8_t legNumber = 0;
+    uint64_t startTime = 0;
+    uint64_t endTime = 0;
+    uint64_t duration = 0;
+    Vector3 startPoint = Vector3(0, 0, 0);
+    Vector3 endPoint = Vector3(0, 0, 0);
+    Vector3 currentPoint = Vector3(0, 0, 0);
+    Vector3 ctrlPoint1 = Vector3(0, 0, 0);
+    Vector3 ctrlPoint2 = Vector3(0, 0, 0);
     bool finished() { return TimeInfo::getInstance().CurrentTime() >= endTime; }
 };
