@@ -16,14 +16,18 @@ Vector3 Vector3::operator+(const Vector3 &other) {
 }
 
 Vector3 &Vector3::operator+=(const Vector3 &other) {
-    x -= other.x;
-    y -= other.y;
-    z -= other.z;
+    x += other.x;
+    y += other.y;
+    z += other.z;
     return *this;
 }
 
-Vector3 Vector3::operator*(float other) {
-    return Vector3(x * other, y * other, z * other);
+Vector3 Vector3::operator*(float multiplier) {
+    return Vector3(x * multiplier, y * multiplier, z * multiplier);
+}
+
+Vector3 Vector3::operator/(float divisor) {
+    return Vector3(x / divisor, y / divisor, z / divisor);
 }
 
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}

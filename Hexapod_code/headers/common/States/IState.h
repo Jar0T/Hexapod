@@ -1,7 +1,7 @@
 #pragma once
 #include <cinttypes>
-#include "Vector/Vector3.h"
 #include "common/Leg.h"
+#include "common/Move/Move.h"
 
 class IState {
 private:
@@ -10,6 +10,6 @@ private:
 public:
     uint8_t get_stage() { return stage; }
     void next_stage() { stage++; }
-    virtual Vector3 get_end_point(Leg leg) = 0;
+    virtual Move get_move(Leg leg, Move previousMove) = 0;
 
 };

@@ -13,7 +13,8 @@ struct Vector3 {
     Vector3& operator-=(const Vector3& other);
     Vector3 operator+(const Vector3& other);
     Vector3& operator+=(const Vector3& other);
-    Vector3 operator*(float other);
+    Vector3 operator*(float multiplier);
+    Vector3 operator/(float divisor);
 };
 
 #endif // VECTOR3_H
