@@ -8,13 +8,18 @@ namespace HexapodController
 {
     public partial class App : Application
     {
+        public static INavigation GlobalNavigation { get; private set; }
 
         public App()
         {
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();
-            MainPage = new AppShell();
+
+            var rootPage = new NavigationPage(new BleDevicesPage());
+            GlobalNavigation = rootPage.Navigation;
+            MainPage = rootPage;
+            //MainPage = new AppShell();
         }
 
         protected override void OnStart()

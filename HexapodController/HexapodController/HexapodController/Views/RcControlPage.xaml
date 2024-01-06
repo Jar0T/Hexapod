@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:customcontrols="clr-namespace:HexapodController.CustomControls"
+             xmlns:vm="clr-namespace:HexapodController.ViewModels"
+             x:DataType="vm:RcControlViewModel"
+             x:Class="HexapodController.Views.RcControlPage"
+             NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="3*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <customcontrols:VirtualJoystick
+                x:Name="MovementJoystick"
+                Command="{Binding MovementJoystickMovedCommand}"
+                BackgroundColor="DarkGray"
+                HandleColor="LightGray"
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"/>
+            <customcontrols:VirtualJoystick
+                x:Name="RotationJoystick"
+                Command="{Binding RotationJoystickMovedCommand}"
+                BackgroundColor="DarkGray"
+                HandleColor="LightGray"
+                Grid.Row="1"
+                Grid.Column="4"
+                Grid.ColumnSpan="3"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

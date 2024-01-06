@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HexapodController.Views.BleDevicesPage"
-             xmlns:vm="clr-namespace:HexapodController.ViewModels" xmlns:customcontrols="clr-namespace:HexapodController.CustomControls"
+             xmlns:vm="clr-namespace:HexapodController.ViewModels"
              Title="{Binding Title}">
 
     <ContentPage.BindingContext>
