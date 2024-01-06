@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -114,6 +114,18 @@ namespace HexapodController.CustomControls
             set => SetValue(HandleColorProperty, value);
         }
 
+        public static readonly BindableProperty CommandProperty =
+            BindableProperty.Create(
+                nameof(Command),
+                typeof(ICommand),
+                typeof(VirtualJoystick));
+
+        public ICommand Command
+        {
+            get => (ICommand)GetValue(CommandProperty);
+            set => SetValue(CommandProperty, value);
+        }
+
         public event EventHandler<Point> JoystickMoved;
 
         public VirtualJoystick()
@@ -132,7 +144,11 @@ namespace HexapodController.CustomControls
 
             AbsoluteLayout.SetLayoutBounds(Handle, new Rectangle(0.5 + x, 0.5 + y, HandleSize, HandleSize));
 
-            JoystickMoved?.Invoke(this, new Point(2 * x, 2 * y));
+            JoystickMoved?.Invoke(this, new Point(2 * x, -2 * y));
+            if (Command != null && Command.CanExecute(null))
+            {
+                Command.Execute(new Point(2 * x, -2 * y));
+            }
         }
     }
 }

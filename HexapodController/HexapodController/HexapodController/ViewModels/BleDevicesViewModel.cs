@@ -1,4 +1,6 @@
-﻿using Plugin.BLE;
+﻿using HexapodController.Views;
+using Plugin.BLE;
+using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using System;
@@ -75,9 +77,25 @@ namespace HexapodController.ViewModels
 
         private bool BleScanCanExecute() { return scanEnabled; }
 
-        private void OnDeviceSelected(IDevice device)
+        async private void OnDeviceSelected(IDevice device)
         {
-            
+            var page = new RcControlPage();
+            if (device.State != DeviceState.Connected)
+            {
+                try
+                {
+                    ConnectParameters connectParameters = new ConnectParameters(false, true);
+                    await bleAdapter.ConnectToDeviceAsync(device, connectParameters);
+                }
+                catch
+                {
+                    //TODO display error
+                    return;
+                }
+            }
+            var viewModel = new RcControlViewModel(device);
+            page.BindingContext = viewModel;
+            await Application.Current.MainPage.Navigation.PushAsync(page);
         }
     }
 }
