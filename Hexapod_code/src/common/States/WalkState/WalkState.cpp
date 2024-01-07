@@ -12,13 +12,13 @@ Move WalkState::get_direction_move(Leg leg, Move previousMove) {
     float angle = leg.legNumber * sixtyDegree - sixtyDegree;
     Vector2 offset = polar_to_cartesian(DEFAULT_RADIUS, angle);
     if (leg.state == LegState::LegStance) {
-        offset -= (rcdata.direction * MAX_SPEED);
+        offset -= (direction * MAX_SPEED);
         move.duration = MOVE_CYCLE_LENGTH * 60 / 100;
     } else {
-        offset += (rcdata.direction * MAX_SPEED);
+        offset += (direction * MAX_SPEED);
         move.duration = MOVE_CYCLE_LENGTH * 40 / 100;
     }
-    move.endPoint = Vector3(offset.x, offset.y, -DEFAULT_HEIGHT);
+    move.endPoint = Vector3(offset.x, offset.y, -height);
     Vector3 vector = (move.endPoint - move.startPoint) / 3;
     move.ctrlPoint1 = move.startPoint + vector + Vector3(0, 0, 100);
     move.ctrlPoint2 = move.ctrlPoint1 + vector;
@@ -42,16 +42,16 @@ Move WalkState::get_rotation_move(Leg leg, Move previousMove) {
     float sixtyDegree = M_PI / 3.f;
     float angle = leg.legNumber * sixtyDegree - sixtyDegree;
     Vector2 offset = polar_to_cartesian(DEFAULT_RADIUS, angle);
-    angle += M_PI/ 2.f;
-    Vector2 rotation = polar_to_cartesian(rcdata.rotation * MAX_SPEED, angle);
+    angle -= M_PI/ 2.f;
+    Vector2 rotationVector = polar_to_cartesian(rotation * MAX_SPEED, angle);
     if (leg.state == LegState::LegStance) {
-        offset -= rotation;
+        offset -= rotationVector;
         move.duration = MOVE_CYCLE_LENGTH * 60 / 100;
     } else {
-        offset += rotation;
+        offset += rotationVector;
         move.duration = MOVE_CYCLE_LENGTH * 40 / 100;
     }
-    move.endPoint = Vector3(offset.x, offset.y, -DEFAULT_HEIGHT);
+    move.endPoint = Vector3(offset.x, offset.y, -height);
     Vector3 vector = (move.endPoint - move.startPoint) / 3;
     move.ctrlPoint1 = move.startPoint + vector + Vector3(0, 0, 100);
     move.ctrlPoint2 = move.ctrlPoint1 + vector;

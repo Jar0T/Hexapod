@@ -14,24 +14,28 @@ namespace HexapodController.ViewModels
         private readonly IDevice _device;
         private readonly List<IService> _services = new List<IService>();
         private readonly List<ICharacteristic> _characteristics = new List<ICharacteristic>();
-        private RCData _rcData;
+        private Vector2 _direction;
+        private float _rotation;
+        private float _height;
 
         public Command<Point> MovementJoystickMovedCommand { get; }
         public Command<Point> RotationJoystickMovedCommand { get; }
+        public Command ResetRobotCommand {  get; }
 
         public RcControlViewModel(IDevice device)
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
             LoadServices();
-            _rcData = new RCData
+            _direction = new Vector2
             {
                 X = 0,
-                Y = 0,
-                FI = 0,
-                H = 100
+                Y = 0
             };
+            _rotation = 0;
+            _height = 150;
             MovementJoystickMovedCommand = new Command<Point>(OnMovementJoystickMoved);
             RotationJoystickMovedCommand = new Command<Point>(OnRotationJoystickMoved);
+            ResetRobotCommand = new Command(OnResetRobot);
         }
 
         private async void LoadServices()
@@ -75,19 +79,19 @@ namespace HexapodController.ViewModels
             }
         }
 
-        private async void WriteRCData()
+        private async void WriteDirection()
         {
             Guid charGuid = new Guid("00000002-61d1-11ee-8c99-0242ac120002");
             ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
             if (characteristic.CanWrite)
             {
-                int size = Marshal.SizeOf(_rcData);
+                int size = Marshal.SizeOf(_direction);
                 byte[] data = new byte[size];
                 IntPtr ptr = IntPtr.Zero;
                 try
                 {
                     ptr = Marshal.AllocHGlobal(size);
-                    Marshal.StructureToPtr(_rcData, ptr, true);
+                    Marshal.StructureToPtr(_direction, ptr, true);
                     Marshal.Copy(ptr, data, 0, size);
                     await characteristic.WriteAsync(data);
                 }
@@ -102,25 +106,84 @@ namespace HexapodController.ViewModels
             }
         }
 
+        private async void WriteRotation()
+        {
+            Guid charGuid = new Guid("00000003-61d1-11ee-8c99-0242ac120002");
+            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
+            if (characteristic.CanWrite)
+            {
+                byte[] data = BitConverter.GetBytes(_rotation);
+                try
+                {
+                    await characteristic.WriteAsync(data);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private async void WriteHeight()
+        {
+            Guid charGuid = new Guid("00000004-61d1-11ee-8c99-0242ac120002");
+            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
+            if (characteristic.CanWrite)
+            {
+                byte[] data = BitConverter.GetBytes(_height);
+                try
+                {
+                    await characteristic.WriteAsync(data);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private async void ResetRobot()
+        {
+            Guid charGuid = new Guid("00000005-61d1-11ee-8c99-0242ac120002");
+            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
+            if (characteristic.CanWrite)
+            {
+                byte[] data = { 1 };
+                try
+                {
+                    await characteristic.WriteAsync(data);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
         private void OnMovementJoystickMoved(Point point)
         {
-            _rcData.X = (float)point.X;
-            _rcData.Y = (float)point.Y;
-            WriteRCData();
+            _direction.X = (float)point.X;
+            _direction.Y = (float)point.Y;
+            WriteDirection();
+            WriteRotation();
         }
 
         private void OnRotationJoystickMoved(Point point)
         {
-            _rcData.FI = (float)point.X;
-            WriteRCData();
+            _rotation = (float)point.X;
+            WriteDirection();
+            WriteRotation();
         }
 
-        private struct RCData
+        private void OnResetRobot()
+        {
+            ResetRobot();
+        }
+
+        private struct Vector2
         {
             public float X { get; set; }
             public float Y { get; set; }
-            public float FI { get; set; }
-            public float H { get; set; }
         }
     }
 }

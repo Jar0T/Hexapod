@@ -28,6 +28,7 @@ void Hexapod::step() {
         previousState = robotState;
         robotState = RobotState::Init;
         state = new InitState;
+        reset = false;
         break;
     case RobotState::Init:
         // Init moves for Init state after state change
@@ -67,6 +68,7 @@ void Hexapod::step() {
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
+                    robotState = RobotState::Reset;
                 }
             }
             pca1.SetChannelsPWM(0, 3, PWM);
@@ -87,6 +89,7 @@ void Hexapod::step() {
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
+                    robotState = RobotState::Reset;
                 }
             }
             pca1.SetChannelsPWM(3, 3, PWM + 3);
@@ -132,6 +135,7 @@ void Hexapod::step() {
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
+                    robotState = RobotState::Reset;
                 }
             }
             pca1.SetChannelsPWM(0, 3, PWM);
@@ -154,6 +158,7 @@ void Hexapod::step() {
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
+                    robotState = RobotState::Reset;
                 }
             }
             pca1.SetChannelsPWM(3, 3, PWM + 3);
@@ -169,6 +174,7 @@ void Hexapod::step() {
                     moves[i].currentPoint = moves[i].endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
+                    robotState = RobotState::Reset;
                 }
             }
             pca1.SetChannelsPWM(0, 9, PWM);
@@ -198,18 +204,11 @@ void Hexapod::step() {
                     legs[i].state = LegState::LegStance;
                 }
                 moves[i] = state->get_move(legs[i], moves[i]);
-                if (i == 3) {
-                printf("Start: (%f, %f, %f)\n", moves[i].startPoint.x, moves[i].startPoint.y, moves[i].startPoint.z);
-                printf("P1: (%f, %f, %f)\n", moves[i].ctrlPoint1.x, moves[i].ctrlPoint1.y, moves[i].ctrlPoint1.z);
-                printf("P2: (%f, %f, %f)\n", moves[i].ctrlPoint2.x, moves[i].ctrlPoint2.y, moves[i].ctrlPoint2.z);
-                printf("End: (%f, %f, %f)\n", moves[i].endPoint.x, moves[i].endPoint.y, moves[i].endPoint.z);
-            }
             }
             float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
             Vector3 endPoint;
             if (legs[i].state == LegState::LegStance) {
                 endPoint = lerp(moves[i].startPoint, moves[i].endPoint, t);
-                if (i == 3) printf("Stance\n");
             } else {
                 endPoint = bezier(
                     moves[i].startPoint,
@@ -218,11 +217,6 @@ void Hexapod::step() {
                     moves[i].endPoint,
                     t
                 );
-                if (i == 3) printf("Swing\n");
-            }
-            if (i == 3) {
-                printf("EP: (%f, %f, %f)\n", endPoint.x, endPoint.y, endPoint.z);
-                printf("T: %f\n", t);
             }
             try {
                 Vector3 angles = IKSolve(endPoint, legs[i]);
@@ -232,6 +226,7 @@ void Hexapod::step() {
                 moves[i].currentPoint = moves[i].endPoint;
             } catch(const std::out_of_range& e) {
                 handle_exceptions(e);
+                robotState = RobotState::Reset;
             }
         }
         pca1.SetChannelsPWM(0, 9, PWM);
@@ -240,4 +235,5 @@ void Hexapod::step() {
     default:
         break;
     }
+    if (reset == true) robotState = RobotState::Reset;
 }

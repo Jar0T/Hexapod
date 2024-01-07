@@ -150,14 +150,26 @@ int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, 
 
     switch (att_handle) {
     case ATT_CHARACTERISTIC_00000002_61d1_11ee_8c99_0242ac120002_01_VALUE_HANDLE:
-        copy_size = MIN(buffer_size, sizeof(rcdata) - received_rc_data_size);
-        memcpy(reinterpret_cast<uint8_t*>(&rcdata) + received_rc_data_size, buffer, copy_size);
+        copy_size = MIN(buffer_size, sizeof(direction) - received_rc_data_size);
+        memcpy(reinterpret_cast<uint8_t*>(&direction) + received_rc_data_size, buffer, copy_size);
         received_rc_data_size += copy_size;
-        if (received_rc_data_size >= sizeof(rcdata)) {
+        if (received_rc_data_size >= sizeof(direction)) {
             received_rc_data_size = 0;
             lastUpdateTime = TimeInfo::getInstance().CurrentTime();
-            // printf("X: %f, Y: %f, R: %f, H: %f\n", rcdata.direction.x, rcdata.direction.y, rcdata.rotation, rcdata.height);
         }
+        break;
+    case ATT_CHARACTERISTIC_00000003_61d1_11ee_8c99_0242ac120002_01_VALUE_HANDLE:
+        memcpy(reinterpret_cast<uint8_t*>(&rotation), buffer, sizeof(rotation));
+        lastUpdateTime = TimeInfo::getInstance().CurrentTime();
+        printf("Rotation: %f\n", rotation);
+        break;
+    case ATT_CHARACTERISTIC_00000004_61d1_11ee_8c99_0242ac120002_01_VALUE_HANDLE:
+        memcpy(reinterpret_cast<uint8_t*>(&height), buffer, sizeof(height));
+        printf("Height: %f\n", height);
+        break;
+    case ATT_CHARACTERISTIC_00000005_61d1_11ee_8c99_0242ac120002_01_VALUE_HANDLE:
+        if (buffer_size > 0) reset = buffer[0];
+        printf("Reset: %d", buffer[0]);
         break;
     default:
         break;

@@ -3,11 +3,12 @@
 #include "helpers/helpers.h"
 #include "Vector/Vector2.h"
 #include "TimeInfo/TimeInfo.h"
+#include "RCData/RCData.h"
 #include <cmath>
 
 Move InitState::get_move(Leg leg, Move previousMove) {
     bool evenStage = get_stage() % 2 == 0;
-    float z = evenStage ? 50 : -DEFAULT_HEIGHT;
+    float z = evenStage ? 50 : -height;
     float sixtyDegree = M_PI / 3.f;
     float angle = leg.legNumber * sixtyDegree - sixtyDegree;
     Vector2 offset = polar_to_cartesian(DEFAULT_RADIUS, angle);
