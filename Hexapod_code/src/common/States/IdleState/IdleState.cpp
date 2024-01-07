@@ -1,13 +1,14 @@
 #include "common/States/IdleState/IdleState.h"
 #include "common/defines.h"
 #include "helpers/helpers.h"
+#include "RCData/RCData.h"
 #include <cmath>
 
 Move IdleState::get_move(Leg leg, Move previousMove) {
     float sixtyDegree = M_PI / 3.f;
     float angle = leg.legNumber * sixtyDegree - sixtyDegree;
     Vector2 offset = polar_to_cartesian(DEFAULT_RADIUS, angle);
-    Vector3 endPoint = Vector3(offset.x, offset.y, -DEFAULT_HEIGHT);
+    Vector3 endPoint = Vector3(offset.x, offset.y, -height);
     Vector3 vector = (endPoint - previousMove.currentPoint) / 3;
     Vector3 P1 = previousMove.currentPoint + vector + Vector3(0, 0, 150);
     Vector3 P2 = previousMove.currentPoint + vector * 2 + Vector3(0, 0, 150);

@@ -180,7 +180,7 @@
 #define TIBIA6_SERVO_MAX_PWM 220
 
 // default distance from center to end effector in xy plane
-#define DEFAULT_RADIUS 320
+#define DEFAULT_RADIUS 300
 // default height of hexapod
 #define DEFAULT_HEIGHT 150
 // max time between rc data updates

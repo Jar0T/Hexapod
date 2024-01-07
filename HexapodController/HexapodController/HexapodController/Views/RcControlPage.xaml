@@ -23,6 +23,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <Button 
+                x:Name="ResetButton"
+                Text="Reset"
+                Command="{Binding ResetRobotCommand}"
+                Grid.Row="0"
+                Grid.Column="6"/>
+
             <customcontrols:VirtualJoystick
                 x:Name="MovementJoystick"
                 Command="{Binding MovementJoystickMovedCommand}"
