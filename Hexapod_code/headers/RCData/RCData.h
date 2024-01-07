@@ -2,6 +2,7 @@
 #define RCDATA_H
 
 #include "Vector/Vector2.h"
+#include <cinttypes>
 
 struct RCData {
     Vector2 direction = {0, 0};
@@ -10,5 +11,6 @@ struct RCData {
 };
 
 extern RCData rcdata;
+extern uint64_t lastUpdateTime;
 
 #endif
