@@ -25,6 +25,7 @@ add_executable(${PROJECT_NAME}
     src/Hexapod/Hexapod.cpp
     src/common/States/InitState/InitState.cpp
     src/common/States/IdleState/IdleState.cpp
+    src/common/States/WalkState/WalkState.cpp
     src/common/ServoDrivers.cpp
 )
 

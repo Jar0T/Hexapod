@@ -1,5 +1,4 @@
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#pragma once
 
 struct Vector3 {
     float x;
@@ -16,5 +15,3 @@ struct Vector3 {
     Vector3 operator*(float multiplier);
     Vector3 operator/(float divisor);
 };
-
-#endif // VECTOR3_H

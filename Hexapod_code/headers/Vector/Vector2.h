@@ -1,5 +1,4 @@
-#ifndef VECTOR2_H
-#define VECTOR2_H
+#pragma once
 
 struct Vector2 {
     union {
@@ -10,6 +9,8 @@ struct Vector2 {
         float y;
         float fi;
     };
-};
 
-#endif // VECTOR2_H
+    Vector2& operator-=(const Vector2& other);
+    Vector2& operator+=(const Vector2& other);
+    Vector2 operator*(float multiplier);
+};

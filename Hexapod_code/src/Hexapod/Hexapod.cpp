@@ -4,8 +4,11 @@
 #include "helpers/helpers.h"
 #include "common/States/InitState/InitState.h"
 #include "common/States/IdleState/IdleState.h"
+#include "common/States/WalkState/WalkState.h"
 #include "common/ServoDrivers.h"
 #include "common/Exception/ExceptionHandler.h"
+#include "RCData/RCData.h"
+#include "common/defines.h"
 #include <stdio.h>
 #include <stdexcept>
 
@@ -43,6 +46,7 @@ void Hexapod::step() {
                 }
             } else {
                 robotState = RobotState::Idle;
+                delete state;
                 state = new IdleState();
                 break;
             }
@@ -98,6 +102,12 @@ void Hexapod::step() {
         }
         previousState = robotState;
         if (std::all_of(moves.begin(), moves.end(), [](Move move) { return move.finished(); })) {
+            if (currentTime - lastUpdateTime < MAX_NO_DATA_TIME) {
+                robotState = RobotState::Walk;
+                delete state;
+                state = new WalkState();
+                break;
+            }
             if (state->get_stage() < 2) {
                 state->next_stage();
                 for (int i = 0; i < 6; i++) {
@@ -164,6 +174,68 @@ void Hexapod::step() {
             pca1.SetChannelsPWM(0, 9, PWM);
             pca2.SetChannelsPWM(0, 9, PWM + 9);
         }
+        break;
+    case RobotState::Walk:
+        if (currentTime - lastUpdateTime > MAX_NO_DATA_TIME) {
+            robotState = RobotState::Idle;
+            delete state;
+            state = new IdleState();
+            break;
+        }
+        if (previousState != RobotState::Walk) {
+            for (int i = 0; i < 6; i++) {
+                legs[i].state = LegState::LegStance;
+                moves[i] = state->get_move(legs[i], moves[i]);
+            }
+            state->next_stage();
+        }
+        previousState = robotState;
+        for (int i = 0; i < 6; i++) {
+            if (moves[i].finished()) {
+                if (legs[i].state == LegState::LegStance) {
+                    legs[i].state = LegState::LegSwing;
+                } else {
+                    legs[i].state = LegState::LegStance;
+                }
+                moves[i] = state->get_move(legs[i], moves[i]);
+                if (i == 3) {
+                printf("Start: (%f, %f, %f)\n", moves[i].startPoint.x, moves[i].startPoint.y, moves[i].startPoint.z);
+                printf("P1: (%f, %f, %f)\n", moves[i].ctrlPoint1.x, moves[i].ctrlPoint1.y, moves[i].ctrlPoint1.z);
+                printf("P2: (%f, %f, %f)\n", moves[i].ctrlPoint2.x, moves[i].ctrlPoint2.y, moves[i].ctrlPoint2.z);
+                printf("End: (%f, %f, %f)\n", moves[i].endPoint.x, moves[i].endPoint.y, moves[i].endPoint.z);
+            }
+            }
+            float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+            Vector3 endPoint;
+            if (legs[i].state == LegState::LegStance) {
+                endPoint = lerp(moves[i].startPoint, moves[i].endPoint, t);
+                if (i == 3) printf("Stance\n");
+            } else {
+                endPoint = bezier(
+                    moves[i].startPoint,
+                    moves[i].ctrlPoint1,
+                    moves[i].ctrlPoint2,
+                    moves[i].endPoint,
+                    t
+                );
+                if (i == 3) printf("Swing\n");
+            }
+            if (i == 3) {
+                printf("EP: (%f, %f, %f)\n", endPoint.x, endPoint.y, endPoint.z);
+                printf("T: %f\n", t);
+            }
+            try {
+                Vector3 angles = IKSolve(endPoint, legs[i]);
+                PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
+                PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
+                PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                moves[i].currentPoint = moves[i].endPoint;
+            } catch(const std::out_of_range& e) {
+                handle_exceptions(e);
+            }
+        }
+        pca1.SetChannelsPWM(0, 9, PWM);
+        pca2.SetChannelsPWM(0, 9, PWM + 9);
         break;
     default:
         break;

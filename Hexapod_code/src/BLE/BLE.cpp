@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <cstring>
 #include "RCData/RCData.h"
+#include "TimeInfo/TimeInfo.h"
 
 #define HEARTBEAT_PERIOD_MS 1000
 
@@ -154,7 +155,8 @@ int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, 
         received_rc_data_size += copy_size;
         if (received_rc_data_size >= sizeof(rcdata)) {
             received_rc_data_size = 0;
-            printf("X: %f, Y: %f, R: %f, H: %f\n", rcdata.direction.x, rcdata.direction.y, rcdata.rotation, rcdata.height);
+            lastUpdateTime = TimeInfo::getInstance().CurrentTime();
+            // printf("X: %f, Y: %f, R: %f, H: %f\n", rcdata.direction.x, rcdata.direction.y, rcdata.rotation, rcdata.height);
         }
         break;
     default:
