@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace HexapodController.ViewModels
@@ -17,6 +19,7 @@ namespace HexapodController.ViewModels
         private Vector2 _direction;
         private float _rotation;
         private float _height;
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public Command<Point> MovementJoystickMovedCommand { get; }
         public Command<Point> RotationJoystickMovedCommand { get; }
@@ -36,6 +39,7 @@ namespace HexapodController.ViewModels
             MovementJoystickMovedCommand = new Command<Point>(OnMovementJoystickMoved);
             RotationJoystickMovedCommand = new Command<Point>(OnRotationJoystickMoved);
             ResetRobotCommand = new Command(OnResetRobot);
+            Task.Run(async () => await WriteMovementData());
         }
 
         private async void LoadServices()
@@ -76,6 +80,16 @@ namespace HexapodController.ViewModels
             catch
             {
                 //TODO: display warning
+            }
+        }
+
+        private async Task WriteMovementData()
+        {
+            while (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                if (_direction.X != 0 || _direction.Y != 0) WriteDirection();
+                if (_rotation != 0) WriteRotation();
+                await Task.Delay(TimeSpan.FromMilliseconds(100), _cancellationTokenSource.Token);
             }
         }
 
@@ -144,7 +158,7 @@ namespace HexapodController.ViewModels
 
         private async void ResetRobot()
         {
-            Guid charGuid = new Guid("00000005-61d1-11ee-8c99-0242ac120002");
+            Guid charGuid = new Guid("00000002-eeaa-4c7d-9a63-8f41e0f2d3a7");
             ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
             if (characteristic.CanWrite)
             {

@@ -182,7 +182,7 @@
 // default distance from center to end effector in xy plane
 #define DEFAULT_RADIUS 300
 // default height of hexapod
-#define DEFAULT_HEIGHT 150
+#define DEFAULT_HEIGHT 100
 // max time between rc data updates
 #define MAX_NO_DATA_TIME 1000000
 // length of move cycle in us
