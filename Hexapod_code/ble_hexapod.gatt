@@ -4,13 +4,16 @@ CHARACTERISTIC, GAP_DEVICE_NAME, READ, "pico_hexapod"
 PRIMARY_SERVICE, GATT_SERVICE
 CHARACTERISTIC, GATT_DATABASE_HASH, READ,
 
-// Service for writing rc data
+// RC data service
 PRIMARY_SERVICE, 00000001-61d1-11ee-8c99-0242ac120002
-// Characteristic for writing direction
+// Direction characteristic
 CHARACTERISTIC, 00000002-61d1-11ee-8c99-0242ac120002, WRITE | DYNAMIC | ENCRYPTION_KEY_SIZE_16
-// Characteristic for writing rotation
+// Rotation characteristic
 CHARACTERISTIC, 00000003-61d1-11ee-8c99-0242ac120002, WRITE | DYNAMIC | ENCRYPTION_KEY_SIZE_16
-// Characteristic for writing height
+// Height characteristic
 CHARACTERISTIC, 00000004-61d1-11ee-8c99-0242ac120002, WRITE | DYNAMIC | ENCRYPTION_KEY_SIZE_16
-// Characteristic to reset robot
-CHARACTERISTIC, 00000005-61d1-11ee-8c99-0242ac120002, WRITE | DYNAMIC | ENCRYPTION_KEY_SIZE_16
+
+// Error and recovery service
+PRIMARY_SERVICE, 00000001-eeaa-4c7d-9a63-8f41e0f2d3a7
+// Recovery characteristic
+CHARACTERISTIC, 00000002-eeaa-4c7d-9a63-8f41e0f2d3a7, WRITE | DYNAMIC | ENCRYPTION_KEY_SIZE_16
