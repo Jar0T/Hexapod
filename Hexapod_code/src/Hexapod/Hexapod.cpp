@@ -113,9 +113,9 @@ void Hexapod::step() {
             }
             if (state->get_stage() < 2) {
                 state->next_stage();
-                for (int i = 0; i < 6; i++) {
-                    moves[i] = state->get_move(legs[i], moves[i]);
-                }
+            }
+            for (int i = 0; i < 6; i++) {
+                moves[i] = state->get_move(legs[i], moves[i]);
             }
         }
         if (state->get_stage() == 0) {

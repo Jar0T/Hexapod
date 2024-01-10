@@ -14,7 +14,7 @@ Move IdleState::get_move(Leg leg, Move previousMove) {
     Vector3 P2 = previousMove.currentPoint + vector * 2 + Vector3(0, 0, 150);
     Move move;
     move.startTime = TimeInfo::getInstance().CurrentTime();
-    move.duration = 1000000;
+    move.duration = get_stage() < 2 ? 1000000 : 500;
     move.endTime = move.startTime + move.duration;
     move.startPoint = previousMove.currentPoint;
     move.ctrlPoint1 = P1;

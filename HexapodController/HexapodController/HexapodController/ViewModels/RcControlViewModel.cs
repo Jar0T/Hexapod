@@ -19,6 +19,23 @@ namespace HexapodController.ViewModels
         private Vector2 _direction;
         private float _rotation;
         private float _height;
+
+        public float Height
+        {
+            get
+            {
+                return _height;
+            }
+            set
+            {
+                if (_height != value)
+                {
+                    _height = value;
+                    WriteHeight();
+                }
+            }
+        }
+
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public Command<Point> MovementJoystickMovedCommand { get; }
