@@ -169,7 +169,7 @@ int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, 
         break;
     case ATT_CHARACTERISTIC_00000002_eeaa_4c7d_9a63_8f41e0f2d3a7_01_VALUE_HANDLE:
         if (buffer_size > 0) reset = buffer[0];
-        printf("Reset: %d", buffer[0]);
+        printf("Reset: %d\n", buffer[0]);
         break;
     default:
         break;

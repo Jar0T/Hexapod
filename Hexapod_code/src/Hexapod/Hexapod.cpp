@@ -98,25 +98,18 @@ void Hexapod::step() {
         }
         break;
     case RobotState::Idle:
-        if (previousState != RobotState::Idle) {
-            for (int i = 0; i < 6; i++) {
-                moves[i] = state->get_move(legs[i], moves[i]);
-            }
-        }
-        previousState = robotState;
         if (std::all_of(moves.begin(), moves.end(), [](Move move) { return move.finished(); })) {
+            if (previousState == robotState && state->get_stage() < 2) state->next_stage();
             if (currentTime - lastUpdateTime < MAX_NO_DATA_TIME) {
                 robotState = RobotState::Walk;
                 delete state;
                 state = new WalkState();
                 break;
             }
-            if (state->get_stage() < 2) {
-                state->next_stage();
-            }
-            for (int i = 0; i < 6; i++) {
-                moves[i] = state->get_move(legs[i], moves[i]);
-            }
+        } 
+        previousState = robotState;
+        for (int i = 0; i < 6; i++) {
+            moves[i] = state->get_move(legs[i], moves[i]);
         }
         if (state->get_stage() == 0) {
             for (int i = 0; i < 6; i+=2) {
@@ -186,6 +179,9 @@ void Hexapod::step() {
             robotState = RobotState::Idle;
             delete state;
             state = new IdleState();
+            for (int i = 0; i < 6; i++) {
+                moves[i].finish();
+            }
             break;
         }
         if (previousState != RobotState::Walk) {
