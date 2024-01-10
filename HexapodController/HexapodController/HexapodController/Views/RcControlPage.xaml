@@ -21,6 +21,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Button 
@@ -28,7 +29,7 @@
                 Text="Reset"
                 Command="{Binding ResetRobotCommand}"
                 Grid.Row="0"
-                Grid.Column="6"/>
+                Grid.Column="7"/>
 
             <customcontrols:VirtualJoystick
                 x:Name="MovementJoystick"
@@ -44,8 +45,17 @@
                 BackgroundColor="DarkGray"
                 HandleColor="LightGray"
                 Grid.Row="1"
-                Grid.Column="4"
+                Grid.Column="5"
                 Grid.ColumnSpan="3"/>
+            <Slider
+                x:Name="HeightSlider"
+                Minimum="0"
+                Maximum="300"
+                Value="{Binding Height}"
+                Rotation="-90"
+                Grid.Row="1"
+                Grid.Column="3"
+                Grid.ColumnSpan="2"/>
         </Grid>
     </ContentPage.Content>
 </ContentPage>
