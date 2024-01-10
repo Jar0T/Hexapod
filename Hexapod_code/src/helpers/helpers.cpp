@@ -26,6 +26,13 @@ bool isInRange(float value, float min, float max) {
     return value >= min && value <= max;
 }
 
+Vector2 lerp(Vector2 start, Vector2 end, float t) {
+    return {
+        start.x + t * (end.x - start.x),
+        start.y + t * (end.y - start.y)
+    };
+}
+
 Vector3 lerp(Vector3 start, Vector3 end, float t) {
     return {
         start.x + t * (end.x - start.x),

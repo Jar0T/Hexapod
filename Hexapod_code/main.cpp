@@ -6,6 +6,7 @@
 #include "TimeInfo/TimeInfo.h"
 #include "Hexapod/Hexapod.h"
 #include "common/ServoDrivers.h"
+#include "RCData/RCData.h"
 
 Hexapod hexapod;
 
@@ -36,6 +37,7 @@ int setup() {
 
 void loop() {
     TimeInfo::getInstance().update();
+    smooth_controls();
     hexapod.step();
 }
 
