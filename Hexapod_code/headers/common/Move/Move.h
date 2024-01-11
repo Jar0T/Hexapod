@@ -14,4 +14,5 @@ struct Move {
     Vector3 ctrlPoint1 = Vector3(0, 0, 0);
     Vector3 ctrlPoint2 = Vector3(0, 0, 0);
     bool finished() { return TimeInfo::getInstance().CurrentTime() >= endTime; }
+    void finish() { endTime = startTime + 1; duration = 1; }
 };
