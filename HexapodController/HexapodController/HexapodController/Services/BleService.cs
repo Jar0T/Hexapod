@@ -1,4 +1,5 @@
 ﻿using Plugin.BLE;
+using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using System;
@@ -33,6 +34,17 @@ namespace HexapodController.Services
                 await _bleAdapter.StartScanningForDevicesAsync();
 
             return _devices;
+        }
+
+        public async Task ConnectToDeviceAsync(IDevice device)
+        {
+            ConnectParameters connectParameters = new ConnectParameters(false, true);
+            await _bleAdapter.ConnectToDeviceAsync(device, connectParameters);
+        }
+
+        public async Task DisconnectFromDeviceAsync(IDevice device)
+        {
+            await _bleAdapter.DisconnectDeviceAsync(device);
         }
     }
 }

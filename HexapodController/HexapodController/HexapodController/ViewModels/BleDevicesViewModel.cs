@@ -1,14 +1,8 @@
 ﻿using HexapodController.Services;
 using HexapodController.Views;
-using Plugin.BLE;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
-using Plugin.BLE.Abstractions.EventArgs;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -18,7 +12,6 @@ namespace HexapodController.ViewModels
     public class BleDevicesViewModel : BaseViewModel
     {
         private IBleService _bleService => DependencyService.Get<IBleService>();
-        private readonly IAdapter bleAdapter;
         private bool scanEnabled = true;
         public ObservableCollection<IDevice> BleDevices { get; }
         public bool ScanEnabled
@@ -36,8 +29,6 @@ namespace HexapodController.ViewModels
 
             BleScanCommand = new Command(OnBleScan, BleScanCanExecute);
             DeviceSelectedCommand = new Command<IDevice>(OnDeviceSelected);
-
-            bleAdapter = CrossBluetoothLE.Current.Adapter;
         }
 
         private async Task<bool> PermissionGrantedAsync()
@@ -83,8 +74,7 @@ namespace HexapodController.ViewModels
             {
                 try
                 {
-                    ConnectParameters connectParameters = new ConnectParameters(false, true);
-                    await bleAdapter.ConnectToDeviceAsync(device, connectParameters);
+                    await _bleService.ConnectToDeviceAsync(device);
                 }
                 catch
                 {
