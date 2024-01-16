@@ -90,5 +90,97 @@ namespace HexapodController.Services
             }
             return characteristics;
         }
+
+        public async Task WriteDataAsync(ICharacteristic characteristic, byte[] data)
+        {
+            if (characteristic != null)
+            {
+                if (characteristic.CanWrite)
+                {
+                    try
+                    {
+                        await characteristic.WriteAsync(data);
+                    }
+                    catch
+                    {
+                        //TODO: Error handling
+                    }
+                }
+                else
+                {
+                    //TODO: characteristic cannot write
+                }
+            }
+            else
+            {
+                //TODO: characteristic is null
+            }
+        }
+
+        public async Task<byte[]> ReadDataAsync(ICharacteristic characteristic)
+        {
+            byte[] data = null;
+            if (characteristic != null)
+            {
+                if (characteristic.CanRead)
+                {
+                    try
+                    {
+                        var received = await characteristic.ReadAsync();
+                        data = received.data;
+                    }
+                    catch
+                    {
+                        //TODO: Error handling
+                    }
+                }
+                else
+                {
+                    //TODO: characteristic cannot read
+                }
+            }
+            else
+            {
+                //TODO: characteristic is null
+            }
+            return data;
+        }
+
+        public async Task RegisterForNotificationsAsync(ICharacteristic characteristic, bool update, Action<ICharacteristic> onUpdate)
+        {
+            if (characteristic != null)
+            {
+                if (characteristic.CanUpdate)
+                {
+                    try
+                    {
+                        if (update)
+                        {
+                            characteristic.ValueUpdated += (e, args) =>
+                            {
+                                onUpdate(args.Characteristic);
+                            };
+                            await characteristic.StartUpdatesAsync();
+                        }
+                        else
+                        {
+                            await characteristic.StopUpdatesAsync();
+                        }
+                    }
+                    catch
+                    {
+                        //TODO: Error handling
+                    }
+                }
+                else
+                {
+                    //TODO: characteristic cannot update
+                }
+            }
+            else
+            {
+                //TODO: characteristic is null
+            }
+        }
     }
 }

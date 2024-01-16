@@ -95,82 +95,54 @@ namespace HexapodController.ViewModels
         private async void WriteDirection()
         {
             Guid charGuid = new Guid("00000002-61d1-11ee-8c99-0242ac120002");
-            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
-            if (characteristic.CanWrite)
+            int size = Marshal.SizeOf(_direction);
+            byte[] data = new byte[size];
+            IntPtr ptr = IntPtr.Zero;
+            try
             {
-                int size = Marshal.SizeOf(_direction);
-                byte[] data = new byte[size];
-                IntPtr ptr = IntPtr.Zero;
-                try
-                {
-                    ptr = Marshal.AllocHGlobal(size);
-                    Marshal.StructureToPtr(_direction, ptr, true);
-                    Marshal.Copy(ptr, data, 0, size);
-                    await characteristic.WriteAsync(data);
-                }
-                catch
-                {
+                ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(_direction, ptr, true);
+                Marshal.Copy(ptr, data, 0, size);
+                await _bleService.WriteDataAsync(
+                    _characteristics.FirstOrDefault((character) => character.Id == charGuid),
+                    data
+                    );
+            }
+            catch
+            {
 
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(ptr);
-                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
             }
         }
 
         private async void WriteRotation()
         {
             Guid charGuid = new Guid("00000003-61d1-11ee-8c99-0242ac120002");
-            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
-            if (characteristic.CanWrite)
-            {
-                byte[] data = BitConverter.GetBytes(_rotation);
-                try
-                {
-                    await characteristic.WriteAsync(data);
-                }
-                catch
-                {
-
-                }
-            }
+            await _bleService.WriteDataAsync(
+                _characteristics.FirstOrDefault((character) => character.Id == charGuid),
+                BitConverter.GetBytes(_rotation)
+                );
         }
 
         private async void WriteHeight()
         {
             Guid charGuid = new Guid("00000004-61d1-11ee-8c99-0242ac120002");
-            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
-            if (characteristic.CanWrite)
-            {
-                byte[] data = BitConverter.GetBytes(_height);
-                try
-                {
-                    await characteristic.WriteAsync(data);
-                }
-                catch
-                {
-
-                }
-            }
+            await _bleService.WriteDataAsync(
+                _characteristics.FirstOrDefault((character) => character.Id == charGuid),
+                BitConverter.GetBytes(_height)
+                );
         }
 
         private async void ResetRobot()
         {
             Guid charGuid = new Guid("00000002-eeaa-4c7d-9a63-8f41e0f2d3a7");
-            ICharacteristic characteristic = _characteristics.First((character) => character.Id == charGuid);
-            if (characteristic.CanWrite)
-            {
-                byte[] data = { 1 };
-                try
-                {
-                    await characteristic.WriteAsync(data);
-                }
-                catch
-                {
-
-                }
-            }
+            await _bleService.WriteDataAsync(
+                _characteristics.FirstOrDefault((character) => character.Id == charGuid),
+                new byte[] { 1 }
+                );
         }
 
         private void OnMovementJoystickMoved(Point point)
