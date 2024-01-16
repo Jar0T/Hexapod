@@ -1,4 +1,5 @@
-﻿using HexapodController.Views;
+﻿using HexapodController.Services;
+using HexapodController.Views;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
@@ -16,6 +17,7 @@ namespace HexapodController.ViewModels
 {
     public class BleDevicesViewModel : BaseViewModel
     {
+        private IBleService _bleService => DependencyService.Get<IBleService>();
         private readonly IAdapter bleAdapter;
         private bool scanEnabled = true;
         public ObservableCollection<IDevice> BleDevices { get; }
@@ -36,7 +38,6 @@ namespace HexapodController.ViewModels
             DeviceSelectedCommand = new Command<IDevice>(OnDeviceSelected);
 
             bleAdapter = CrossBluetoothLE.Current.Adapter;
-            bleAdapter.DeviceDiscovered += bleAdapter_DeviceDiscovered;
         }
 
         private async Task<bool> PermissionGrantedAsync()
@@ -51,12 +52,6 @@ namespace HexapodController.ViewModels
             return status == PermissionStatus.Granted;
         }
 
-        private void bleAdapter_DeviceDiscovered(object sendef, DeviceEventArgs e)
-        {
-            if (e.Device != null && !string.IsNullOrEmpty(e.Device.Name))
-                BleDevices.Add(e.Device);
-        }
-
         private async void OnBleScan()
         {
             ScanEnabled = false;
@@ -69,8 +64,12 @@ namespace HexapodController.ViewModels
 
             BleDevices.Clear();
 
-            if (!bleAdapter.IsScanning)
-                await bleAdapter.StartScanningForDevicesAsync();
+            var devices = await _bleService.GetDevicesAsync();
+
+            foreach (var device in devices)
+            {
+                BleDevices.Add(device);
+            }
 
             ScanEnabled = true;
         }
