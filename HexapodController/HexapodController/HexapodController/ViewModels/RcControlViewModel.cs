@@ -1,4 +1,5 @@
-﻿using Plugin.BLE.Abstractions.Contracts;
+﻿using HexapodController.Services;
+using Plugin.BLE.Abstractions.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,13 @@ namespace HexapodController.ViewModels
 {
     public class RcControlViewModel : BaseViewModel
     {
+        private IBleService _bleService => DependencyService.Get<IBleService>();
         private readonly IDevice _device;
         private readonly List<IService> _services = new List<IService>();
         private readonly List<ICharacteristic> _characteristics = new List<ICharacteristic>();
-        private Vector2 _direction;
-        private float _rotation;
-        private float _height;
-
+        private Vector2 _direction = new Vector2 { X = 0, Y = 0};
+        private float _rotation = 0;
+        private float _height = 100;
         public float Height
         {
             get
@@ -45,58 +46,39 @@ namespace HexapodController.ViewModels
         public RcControlViewModel(IDevice device)
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
-            LoadServices();
-            _direction = new Vector2
-            {
-                X = 0,
-                Y = 0
-            };
-            _rotation = 0;
-            _height = 150;
+            LoadServicesAndCharacteristics();
             MovementJoystickMovedCommand = new Command<Point>(OnMovementJoystickMoved);
             RotationJoystickMovedCommand = new Command<Point>(OnRotationJoystickMoved);
             ResetRobotCommand = new Command(OnResetRobot);
             Task.Run(async () => await WriteMovementData());
         }
 
-        private async void LoadServices()
+        private async void LoadServicesAndCharacteristics()
         {
-            try
+            await LoadServices();
+            await LoadCharacteristics();
+        }
+
+        private async Task LoadServices()
+        {
+            _services.Clear();
+            _services.AddRange(await _bleService.GetServicesAsync(_device));
+
+            Guid guid = new Guid("00000001-61d1-11ee-8c99-0242ac120002");
+            if (!_services.Any((service) => service.Id == guid))
             {
-                var servicesReadOnly = await _device.GetServicesAsync();
-                _services.Clear();
-                _characteristics.Clear();
-                foreach (var service in servicesReadOnly)
-                {
-                    _services.Add(service);
-                    LoadCharacteristics(service);
-                }
-                Guid guid = new Guid("00000001-61d1-11ee-8c99-0242ac120002");
-                if (!_services.Any((service) => service.Id == guid))
-                {
-                    //TODO: display warning and pop back to ble devices page
-                    await Application.Current.MainPage.Navigation.PopAsync();
-                }
-            }
-            catch
-            {
-                //TODO: display warning
+                //TODO: display warning and pop back to ble devices page
+                await _bleService.DisconnectFromDeviceAsync(_device);
+                await Application.Current.MainPage.Navigation.PopAsync();
             }
         }
 
-        private async void LoadCharacteristics(IService service)
+        private async Task LoadCharacteristics()
         {
-            try
+            _characteristics.Clear();
+            foreach (var service in _services)
             {
-                var characteristicsReadOnly = await service.GetCharacteristicsAsync();
-                foreach (var characteristic in characteristicsReadOnly)
-                {
-                    _characteristics.Add(characteristic);
-                }
-            }
-            catch
-            {
-                //TODO: display warning
+                _characteristics.AddRange(await _bleService.GetCharacteristicsAsync(service));
             }
         }
 

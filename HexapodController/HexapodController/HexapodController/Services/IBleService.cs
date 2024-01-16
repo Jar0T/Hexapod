@@ -9,5 +9,7 @@ namespace HexapodController.Services
         Task<IEnumerable<IDevice>> GetDevicesAsync();
         Task ConnectToDeviceAsync(IDevice device);
         Task DisconnectFromDeviceAsync(IDevice device);
+        Task<IEnumerable<IService>> GetServicesAsync(IDevice device);
+        Task<IEnumerable<ICharacteristic>> GetCharacteristicsAsync(IService service);
     }
 }
