@@ -1,13 +1,8 @@
-﻿using HexapodController.Views;
-using Plugin.BLE;
+﻿using HexapodController.Services;
+using HexapodController.Views;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
-using Plugin.BLE.Abstractions.EventArgs;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -16,7 +11,7 @@ namespace HexapodController.ViewModels
 {
     public class BleDevicesViewModel : BaseViewModel
     {
-        private readonly IAdapter bleAdapter;
+        private IBleService _bleService => DependencyService.Get<IBleService>();
         private bool scanEnabled = true;
         public ObservableCollection<IDevice> BleDevices { get; }
         public bool ScanEnabled
@@ -34,9 +29,6 @@ namespace HexapodController.ViewModels
 
             BleScanCommand = new Command(OnBleScan, BleScanCanExecute);
             DeviceSelectedCommand = new Command<IDevice>(OnDeviceSelected);
-
-            bleAdapter = CrossBluetoothLE.Current.Adapter;
-            bleAdapter.DeviceDiscovered += bleAdapter_DeviceDiscovered;
         }
 
         private async Task<bool> PermissionGrantedAsync()
@@ -51,12 +43,6 @@ namespace HexapodController.ViewModels
             return status == PermissionStatus.Granted;
         }
 
-        private void bleAdapter_DeviceDiscovered(object sendef, DeviceEventArgs e)
-        {
-            if (e.Device != null && !string.IsNullOrEmpty(e.Device.Name))
-                BleDevices.Add(e.Device);
-        }
-
         private async void OnBleScan()
         {
             ScanEnabled = false;
@@ -69,8 +55,12 @@ namespace HexapodController.ViewModels
 
             BleDevices.Clear();
 
-            if (!bleAdapter.IsScanning)
-                await bleAdapter.StartScanningForDevicesAsync();
+            var devices = await _bleService.GetDevicesAsync();
+
+            foreach (var device in devices)
+            {
+                BleDevices.Add(device);
+            }
 
             ScanEnabled = true;
         }
@@ -84,8 +74,7 @@ namespace HexapodController.ViewModels
             {
                 try
                 {
-                    ConnectParameters connectParameters = new ConnectParameters(false, true);
-                    await bleAdapter.ConnectToDeviceAsync(device, connectParameters);
+                    await _bleService.ConnectToDeviceAsync(device);
                 }
                 catch
                 {
