@@ -3,8 +3,14 @@
 #include <cstring>
 #include "RCData/RCData.h"
 #include "TimeInfo/TimeInfo.h"
+#include "ble/gatt-service/battery_service_server.h"
+#include <vector>
 
 #define HEARTBEAT_PERIOD_MS 1000
+#define MAX_BUFFER_SIZE 1000
+
+void stream_sensors();
+void remove_data_from_angles_buffer(size_t size);
 
 uint16_t received_rc_data_size = 0;
 
@@ -17,10 +23,15 @@ uint8_t adv_data[] = {
 };
 const uint8_t adv_data_len = sizeof(adv_data);
 
-int le_notification_enabled;
-btstack_timer_source_t heartbeat;
 btstack_packet_callback_registration_t sm_event_callback_registration;
+btstack_timer_source_t heartbeat;
+
+int le_notification_enabled;
 hci_con_handle_t con_handle;
+
+uint16_t max_transfer_size = ATT_DEFAULT_MTU;
+uint8_t battery_level = 100;
+std::vector<uint8_t> angles_buffer;
 
 void le_counter_setup(void) {
     l2cap_init();
@@ -44,6 +55,8 @@ void le_counter_setup(void) {
     // register for ATT event
     att_server_register_packet_handler(packet_handler);
 
+    battery_service_server_init(battery_level);
+
     // set one-shot timer
     heartbeat.process = &heartbeat_handler;
     btstack_run_loop_set_timer(&heartbeat, HEARTBEAT_PERIOD_MS);
@@ -57,6 +70,10 @@ void le_counter_setup(void) {
 }
 
 void heartbeat_handler(struct btstack_timer_source *ts) {
+    battery_level -= 5;
+    if (battery_level == 0) battery_level = 100;
+    battery_service_server_set_battery_value(battery_level);
+
     // Restart timer
     btstack_run_loop_set_timer(ts, HEARTBEAT_PERIOD_MS);
     btstack_run_loop_add_timer(ts);
@@ -129,7 +146,18 @@ void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint
         break;
     case HCI_EVENT_DISCONNECTION_COMPLETE:
         printf("Disconnected\n");
+        le_notification_enabled = false;
         received_rc_data_size = 0;
+        break;
+    case ATT_EVENT_CONNECTED:
+        max_transfer_size = att_server_get_mtu(att_event_connected_get_handle(packet)) - 3;
+        printf("ATT connected. Transfer size: %d\n", max_transfer_size);
+        break;
+    case ATT_EVENT_MTU_EXCHANGE_COMPLETE:
+        max_transfer_size = att_event_mtu_exchange_complete_get_MTU(packet) - 3;
+        break;
+    case ATT_EVENT_CAN_SEND_NOW:
+        stream_sensors();
         break;
     default:
         break;
@@ -156,6 +184,7 @@ int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, 
         if (received_rc_data_size >= sizeof(targetDirection)) {
             received_rc_data_size = 0;
             lastUpdateTime = TimeInfo::getInstance().CurrentTime();
+            printf("Direction: (%f, %f)\n", targetDirection.x, targetDirection.y);
         }
         break;
     case ATT_CHARACTERISTIC_00000003_61d1_11ee_8c99_0242ac120002_01_VALUE_HANDLE:
@@ -171,8 +200,54 @@ int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle, 
         if (buffer_size > 0) reset = buffer[0];
         printf("Reset: %d\n", buffer[0]);
         break;
+    case ATT_CHARACTERISTIC_00000002_2ec8_467d_901b_5e81822a6ffe_01_CLIENT_CONFIGURATION_HANDLE:
+        le_notification_enabled = little_endian_read_16(buffer, 0) == GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION;
+        if (le_notification_enabled) {
+            con_handle = connection_handle;
+            att_server_request_can_send_now_event(con_handle);
+            printf("Sensors notifications enabled\n");
+        } else {
+            angles_buffer.clear();
+            printf("Sensors notifications disabled\n");
+        }
+        break;
     default:
         break;
     }
     return 0;
+}
+
+void stream_sensors() {
+    if (le_notification_enabled) {
+        uint16_t transfer_size = MIN(angles_buffer.size(), max_transfer_size);
+        if (transfer_size > 0) {
+            att_server_notify(con_handle,
+                ATT_CHARACTERISTIC_00000002_2ec8_467d_901b_5e81822a6ffe_01_VALUE_HANDLE,
+                angles_buffer.data(),
+                transfer_size);
+            remove_data_from_angles_buffer(transfer_size);
+        }
+        att_server_request_can_send_now_event(con_handle);
+    }
+    return;
+}
+
+void add_angles_to_buffer(uint8_t leg_number, Vector3 angles) {
+    uint32_t time = TimeInfo::getInstance().CurrentTime();
+    size_t size = angles_buffer.size();
+    size_t data_size = sizeof(time) + sizeof(leg_number) + sizeof(angles);
+
+    if (size + data_size < MAX_BUFFER_SIZE) {
+
+        angles_buffer.resize(size + data_size);
+
+        memcpy(angles_buffer.data() + size, &time, sizeof(time));
+        memcpy(angles_buffer.data() + size + sizeof(time), &leg_number, sizeof(leg_number));
+        memcpy(angles_buffer.data() + size + sizeof(time) + sizeof(leg_number), &angles, sizeof(angles));
+    }
+}
+
+void remove_data_from_angles_buffer(size_t size) {
+    if (size > angles_buffer.size()) size = angles_buffer.size();
+    angles_buffer.erase(angles_buffer.begin(), angles_buffer.begin() + size);
 }
