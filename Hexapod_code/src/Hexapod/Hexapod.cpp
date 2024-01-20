@@ -9,6 +9,7 @@
 #include "common/Exception/ExceptionHandler.h"
 #include "RCData/RCData.h"
 #include "common/defines.h"
+#include "BLE/BLE.h"
 #include <stdio.h>
 #include <stdexcept>
 
@@ -65,6 +66,7 @@ void Hexapod::step() {
                     PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                     PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                     PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                    add_angles_to_buffer(i, angles);
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
@@ -86,6 +88,7 @@ void Hexapod::step() {
                     PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                     PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                     PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                    add_angles_to_buffer(i, angles);
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
@@ -125,6 +128,7 @@ void Hexapod::step() {
                     PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                     PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                     PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                    add_angles_to_buffer(i, angles);
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
@@ -148,6 +152,7 @@ void Hexapod::step() {
                     PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                     PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                     PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                    add_angles_to_buffer(i, angles);
                     moves[i].currentPoint = endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
@@ -164,6 +169,7 @@ void Hexapod::step() {
                     PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                     PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                     PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                    add_angles_to_buffer(i, angles);
                     moves[i].currentPoint = moves[i].endPoint;
                 } catch(const std::out_of_range& e) {
                     handle_exceptions(e);
@@ -219,6 +225,7 @@ void Hexapod::step() {
                 PWM[i * 3 + 0] = legs[i].coxaServo.PwmFromAngle(angles.x);
                 PWM[i * 3 + 1] = legs[i].femurServo.PwmFromAngle(angles.y);
                 PWM[i * 3 + 2] = legs[i].tibiaServo.PwmFromAngle(angles.z);
+                add_angles_to_buffer(i, angles);
                 moves[i].currentPoint = moves[i].endPoint;
             } catch(const std::out_of_range& e) {
                 handle_exceptions(e);

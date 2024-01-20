@@ -48,8 +48,8 @@ include_directories(headers)
 include_directories(${CMAKE_SOURCE_DIR}/libs/pca9685/include)
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(${PROJECT_NAME} 1)
-pico_enable_stdio_uart(${PROJECT_NAME} 0)
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 # Need to generate UF2 file for upload to RP2040
 pico_add_extra_outputs(${PROJECT_NAME})
