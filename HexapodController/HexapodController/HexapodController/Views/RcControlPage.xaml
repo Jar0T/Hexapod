@@ -7,6 +7,14 @@
              x:Class="HexapodController.Views.RcControlPage"
              NavigationPage.HasNavigationBar="False">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <ContentPage.Content>
         <Grid>
             <Grid.RowDefinitions>
@@ -23,6 +31,59 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+
+            <Switch
+                x:Name="NotificationSwitch"
+                IsToggled="{Binding NotificationsEnabled}"
+                Grid.Row="0"
+                Grid.Column="0"/>
+            <Grid
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="6">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Label
+                    x:Name="ReceivedDataString1"
+                    Text="{Binding AnglesString1}"
+                    Grid.Row="0"
+                    Grid.Column="0"/>
+                <Label
+                    x:Name="ReceivedDataString2"
+                    Text="{Binding AnglesString2}"
+                    Grid.Row="0"
+                    Grid.Column="1"/>
+                <Label
+                    x:Name="ReceivedDataString3"
+                    Text="{Binding AnglesString3}"
+                    Grid.Row="0"
+                    Grid.Column="2"/>
+                <Label
+                    x:Name="ReceivedDataString4"
+                    Text="{Binding AnglesString4}"
+                    Grid.Row="1"
+                    Grid.Column="0"/>
+                <Label
+                    x:Name="ReceivedDataString5"
+                    Text="{Binding AnglesString5}"
+                    Grid.Row="1"
+                    Grid.Column="1"/>
+                <Label
+                    x:Name="ReceivedDataString6"
+                    Text="{Binding AnglesString6}"
+                    Grid.Row="1"
+                    Grid.Column="2"/>
+
+            </Grid>
 
             <Button 
                 x:Name="ResetButton"

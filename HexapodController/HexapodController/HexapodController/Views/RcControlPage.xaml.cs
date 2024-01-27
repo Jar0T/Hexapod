@@ -1,4 +1,5 @@
-﻿using Plugin.BLE.Abstractions.Contracts;
+﻿using HexapodController.ViewModels;
+using Plugin.BLE.Abstractions.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
