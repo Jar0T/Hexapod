@@ -5,9 +5,12 @@
 #include "TimeInfo/TimeInfo.h"
 #include "ble/gatt-service/battery_service_server.h"
 #include <vector>
+#include "pico/multicore.h"
 
 #define HEARTBEAT_PERIOD_MS 1000
 #define MAX_BUFFER_SIZE 1000
+
+const uint16_t startToken = 0xAAAA;
 
 void stream_sensors();
 void remove_data_from_angles_buffer(size_t size);
@@ -38,6 +41,15 @@ void le_counter_setup(void) {
     sm_init();
     att_server_init(profile_data, att_read_callback, att_write_callback);
 
+    // register for HCI events
+    sm_event_callback_registration.callback = &packet_handler;
+    sm_add_event_handler(&sm_event_callback_registration);
+
+    // register for ATT event
+    att_server_register_packet_handler(att_packet_handler);
+
+    battery_service_server_init(battery_level);
+
     // setup advertisements
     uint16_t adv_int_min = 0x0030;
     uint16_t adv_int_max = 0x0030;
@@ -47,15 +59,6 @@ void le_counter_setup(void) {
     gap_advertisements_set_params(adv_int_min, adv_int_max, adv_type, 0, null_addr, 0x07, 0x00);
     gap_advertisements_set_data(adv_data_len, (uint8_t *)adv_data);
     gap_advertisements_enable(1);
-
-    // register for HCI events
-    sm_event_callback_registration.callback = &packet_handler;
-    sm_add_event_handler(&sm_event_callback_registration);
-
-    // register for ATT event
-    att_server_register_packet_handler(packet_handler);
-
-    battery_service_server_init(battery_level);
 
     // set one-shot timer
     heartbeat.process = &heartbeat_handler;
@@ -146,18 +149,39 @@ void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint
         break;
     case HCI_EVENT_DISCONNECTION_COMPLETE:
         printf("Disconnected\n");
-        le_notification_enabled = false;
-        received_rc_data_size = 0;
         break;
-    case ATT_EVENT_CONNECTED:
-        max_transfer_size = att_server_get_mtu(att_event_connected_get_handle(packet)) - 3;
-        printf("ATT connected. Transfer size: %d\n", max_transfer_size);
+    default:
         break;
-    case ATT_EVENT_MTU_EXCHANGE_COMPLETE:
-        max_transfer_size = att_event_mtu_exchange_complete_get_MTU(packet) - 3;
-        break;
-    case ATT_EVENT_CAN_SEND_NOW:
-        stream_sensors();
+    }
+}
+
+void att_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size) {
+    UNUSED(channel);
+    UNUSED(size);
+
+    switch (packet_type) {
+    case HCI_EVENT_PACKET:
+        switch (hci_event_packet_get_type(packet)) {
+            case ATT_EVENT_CONNECTED:
+                max_transfer_size = att_server_get_mtu(att_event_connected_get_handle(packet)) - 3;
+                printf("ATT connected. Transfer size: %d\n", max_transfer_size);
+                break;
+            case ATT_EVENT_MTU_EXCHANGE_COMPLETE:
+                max_transfer_size = att_server_get_mtu(att_event_connected_get_handle(packet)) - 3;
+                printf("ATT connected. Transfer size: %d\n", max_transfer_size);
+                break;
+            case ATT_EVENT_CAN_SEND_NOW:
+                stream_sensors();
+                break;
+            case ATT_EVENT_DISCONNECTED:
+                le_notification_enabled = false;
+                received_rc_data_size = 0;
+                angles_buffer.clear();
+                printf("ATT disconnected\n");
+                break;
+            default:
+                break;
+        }
         break;
     default:
         break;
@@ -234,16 +258,17 @@ void stream_sensors() {
 
 void add_angles_to_buffer(uint8_t leg_number, Vector3 angles) {
     uint32_t time = TimeInfo::getInstance().CurrentTime();
+
     size_t size = angles_buffer.size();
-    size_t data_size = sizeof(time) + sizeof(leg_number) + sizeof(angles);
+    size_t data_size = sizeof(time) + sizeof(leg_number) + sizeof(angles) + 2;
 
     if (size + data_size < MAX_BUFFER_SIZE) {
-
         angles_buffer.resize(size + data_size);
 
-        memcpy(angles_buffer.data() + size, &time, sizeof(time));
-        memcpy(angles_buffer.data() + size + sizeof(time), &leg_number, sizeof(leg_number));
-        memcpy(angles_buffer.data() + size + sizeof(time) + sizeof(leg_number), &angles, sizeof(angles));
+        memcpy(angles_buffer.data() + size, &startToken, sizeof(startToken));
+        memcpy(angles_buffer.data() + size + 2, &time, sizeof(time));
+        memcpy(angles_buffer.data() + size + 2 + sizeof(time), &leg_number, sizeof(leg_number));
+        memcpy(angles_buffer.data() + size + 2 + sizeof(time) + sizeof(leg_number), &angles, sizeof(angles));
     }
 }
 
