@@ -2,6 +2,7 @@
 using Plugin.BLE.Abstractions.Contracts;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -23,10 +24,7 @@ namespace HexapodController.ViewModels
         private float _height = 100;
         public float Height
         {
-            get
-            {
-                return _height;
-            }
+            get { return _height; }
             set
             {
                 if (_height != value)
@@ -36,6 +34,58 @@ namespace HexapodController.ViewModels
                 }
             }
         }
+        private bool _notificationsEnabled = false;
+        public bool NotificationsEnabled
+        {
+            get { return _notificationsEnabled; }
+            set
+            {
+                if (_notificationsEnabled != value)
+                {
+                    _notificationsEnabled = value;
+                    EnableNotifications();
+                }
+            }
+        }
+
+        private string _anglesString1 = "";
+        public string AnglesString1
+        {
+            get => _anglesString1;
+            set => SetProperty(ref _anglesString1, value);
+        }
+        private string _anglesString2 = "";
+        public string AnglesString2
+        {
+            get => _anglesString2;
+            set => SetProperty(ref _anglesString2, value);
+        }
+        private string _anglesString3 = "";
+        public string AnglesString3
+        {
+            get => _anglesString3;
+            set => SetProperty(ref _anglesString3, value);
+        }
+        private string _anglesString4 = "";
+        public string AnglesString4
+        {
+            get => _anglesString4;
+            set => SetProperty(ref _anglesString4, value);
+        }
+        private string _anglesString5 = "";
+        public string AnglesString5
+        {
+            get => _anglesString5;
+            set => SetProperty(ref _anglesString5, value);
+        }
+        private string _anglesString6 = "";
+        public string AnglesString6
+        {
+            get => _anglesString6;
+            set => SetProperty(ref _anglesString6, value);
+        }
+
+        private MemoryStream _receivedData = new MemoryStream();
 
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -136,6 +186,92 @@ namespace HexapodController.ViewModels
                 );
         }
 
+        private async void EnableNotifications()
+        {
+            Guid characterGuid = new Guid("00000002-2ec8-467d-901b-5e81822a6ffe");
+            await _bleService.RegisterForNotificationsAsync(
+                _characteristics.FirstOrDefault((characteristic) => characteristic.Id == characterGuid),
+                _notificationsEnabled,
+                (characteristic) => {
+                    byte[] buffer = characteristic.Value;
+                    ProcessReceivedData(buffer, buffer.Length);
+                }
+                );
+            if ( _notificationsEnabled ) { _receivedData = new MemoryStream(); }
+        }
+
+        private void ProcessReceivedData(byte[] buffer, int length)
+        {
+            _receivedData.Write(buffer, 0, length);
+            
+            bool dataStartFound = false;
+            byte[] data = new byte[2];
+
+            for (int i = 0 ; i < _receivedData.Length - 1; i++)
+            {
+                _receivedData.Position = i;
+                _receivedData.Read(data, 0, 2);
+                if (data[0] == 0xaa && data[1] == 0xaa)
+                {
+                    _receivedData.Position = i;
+                    dataStartFound = true;
+                    break;
+                }
+            }
+
+            if (dataStartFound)
+            {
+                AnglesData anglesData = new AnglesData();
+                while (_receivedData.Length - _receivedData.Position >= Marshal.SizeOf(anglesData) + 2)
+                {
+                    _receivedData.Position += 2;
+
+                    data = new byte[Marshal.SizeOf(anglesData)];
+                    _receivedData.Read(data, 0, data.Length);
+
+                    GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                    try
+                    {
+                        anglesData = (AnglesData)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(AnglesData));
+                        double converter = 180 / Math.PI;
+                        string angles = $"A: {anglesData.Alpha * converter:0.00}\nB: {anglesData.Beta * converter:0.00}\nC: {anglesData.Gamma * converter:0.00}";
+                        switch (anglesData.Leg)
+                        {
+                            case 0:
+                                AnglesString1 = angles;
+                                break;
+                            case 1:
+                                AnglesString2 = angles;
+                                break;
+                            case 2:
+                                AnglesString3 = angles;
+                                break;
+                            case 3:
+                                AnglesString4 = angles;
+                                break;
+                            case 4:
+                                AnglesString5 = angles;
+                                break;
+                            case 5:
+                                AnglesString6 = angles;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    finally
+                    {
+                        handle.Free();
+                    }
+
+                    MemoryStream newBuffer = new MemoryStream();
+                    _receivedData.CopyTo(newBuffer);
+                    _receivedData = newBuffer;
+                    _receivedData.Position = 0;
+                }
+            }
+        }
+
         private async void ResetRobot()
         {
             Guid charGuid = new Guid("00000002-eeaa-4c7d-9a63-8f41e0f2d3a7");
@@ -169,6 +305,16 @@ namespace HexapodController.ViewModels
         {
             public float X { get; set; }
             public float Y { get; set; }
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct AnglesData
+        {
+            public UInt32 Time { get; set; }
+            public byte Leg { get; set; }
+            public float Alpha {  get; set; }
+            public float Beta {  get; set; }
+            public float Gamma {  get; set; }
         }
     }
 }
