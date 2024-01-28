@@ -56,6 +56,11 @@ Vector3 bezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t) {
     return p;
 }
 
+float smoothstep(float start, float end, float t) {
+    float tSmooth = (1 - cos(t * M_PI)) * 0.5f;
+    return start * (1 - tSmooth) + end * tSmooth;
+}
+
 float arctan2(float y, float x) {
     if (x >= 0.f && y >= 0.f) return atan(y / x);
     else if (x < 0.f) return atan(y / x) + M_PI;
