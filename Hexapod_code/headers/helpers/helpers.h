@@ -11,5 +11,6 @@ bool isInRange(float value, float min, float max);
 Vector2 lerp(Vector2 start, Vector2 end, float t);
 Vector3 lerp(Vector3 start, Vector3 end, float t);
 Vector3 bezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t);
+float smoothstep(float start, float end, float t);
 // Custom atan2 function that returns value in range 0 to 2PI rad.
 float arctan2(float y, float x);

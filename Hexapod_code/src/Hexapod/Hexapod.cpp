@@ -56,7 +56,7 @@ void Hexapod::step() {
         // Write PWM to legs depending on state's stage
         if (state->get_stage() < 2) {
             for (int i = 0; i < 6; i+=2) {
-                float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+                float t = smoothstep(0, 1, (float)(currentTime - moves[i].startTime) / (float)moves[i].duration);
                 Vector3 endPoint = lerp(
                     moves[i].startPoint,
                     moves[i].endPoint,
@@ -78,7 +78,7 @@ void Hexapod::step() {
             pca2.SetChannelsPWM(3, 3, PWM + 12);
         } else {
             for (int i = 1; i < 6; i+=2) {
-                float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+                float t = smoothstep(0, 1, (float)(currentTime - moves[i].startTime) / (float)moves[i].duration);
                 Vector3 endPoint = lerp(
                     moves[i].startPoint,
                     moves[i].endPoint,
@@ -116,7 +116,7 @@ void Hexapod::step() {
         }
         if (state->get_stage() == 0) {
             for (int i = 0; i < 6; i+=2) {
-                float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+                float t = smoothstep(0, 1, (float)(currentTime - moves[i].startTime) / (float)moves[i].duration);
                 Vector3 endPoint = bezier(
                     moves[i].startPoint,
                     moves[i].ctrlPoint1,
@@ -140,7 +140,7 @@ void Hexapod::step() {
             pca2.SetChannelsPWM(3, 3, PWM + 12);
         } else if (state->get_stage() == 1) {
             for (int i = 1; i < 6; i+=2) {
-                float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+                float t = smoothstep(0, 1, (float)(currentTime - moves[i].startTime) / (float)moves[i].duration);
                 Vector3 endPoint = bezier(
                     moves[i].startPoint,
                     moves[i].ctrlPoint1,
@@ -207,7 +207,7 @@ void Hexapod::step() {
                 }
                 moves[i] = state->get_move(legs[i], moves[i]);
             }
-            float t = (float)(currentTime - moves[i].startTime) / (float)moves[i].duration;
+            float t = smoothstep(0, 1, (float)(currentTime - moves[i].startTime) / (float)moves[i].duration);
             Vector3 endPoint;
             if (legs[i].state == LegState::LegStance) {
                 endPoint = lerp(moves[i].startPoint, moves[i].endPoint, t);
