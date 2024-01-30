@@ -14,13 +14,11 @@ namespace HexapodController
         {
             InitializeComponent();
 
-            DependencyService.Register<MockDataStore>();
             DependencyService.Register<BleService>();
 
             var rootPage = new NavigationPage(new BleDevicesPage());
             GlobalNavigation = rootPage.Navigation;
             MainPage = rootPage;
-            //MainPage = new AppShell();
         }
 
         protected override void OnStart()
