@@ -3,6 +3,7 @@
 * [Hardware setup](hardware-setup)
 * [Firmware setup](firmware-setup)
 * [Usage](usage)
+* [Functionalities](functionalities)
 * [Additional resources](additional-resources)
 
 ## General info
@@ -64,6 +65,33 @@ In [BLE.cpp](/src/BLE/BLE.cpp) file find ```sm_use_fixed_passkey_in_display_role
 ## Usage
 To build project you need Pico SDK.
 If you have Pico SDK already installed then run Pico Visual Studio Code and configure project on CMake tab. Then build project using build button. After building project you can drop .uf2 file to Raspberry Pico or use PicoProbe to upload project to microcontroller.
+
+## Functionalities
+
+### IKSolve
+IKSolve method is used to solve Inverse Kinematics for given leg and given end effector. It calculates three angles $\theta_1, \theta_2, \theta_3$ for three joints of leg. It uses this algorithm for calculations:
+1. All coordinates are offset by leg offset, so that leg anchor is at (0, 0),
+$Ef = Ef - (Ofc_x, Ofc_y, 0)$
+2. $\theta_1$ is calculated,
+$\gamma = \arctan(Ef_y, Ef_x)$
+$\theta_1 = \gamma - Ofp_\phi$
+$\theta_1$ needs to be in range $(-\pi, \pi>$, so if $\theta_1 > \pi$ then $\theta_1 = \theta_1 - 2\pi$
+3. Coordinates are offset by coxa lenght, so that femur anchor is at (0, 0),
+$Ef = Ef - (c_x, c_y, 0)$
+4. P and K values are calculated,
+$P = \sqrt{Ef_x^2 + Ef_y^2}$
+$K = \sqrt{P^2 + Ef_z^2}$
+5. $\theta_2$ is calculated
+$\gamma = \arccos((Femur_l^2 + K^2 - Tibia_l^2)/(2 * Femur_l * K))$
+$\delta = \arctan(Ef_z/P)$
+$\theta_2 = \gamma + \delta$
+6. $\theta_3$ is calculated
+$\gamma = \arccos((Tibia_l^2 + Femur_l^2 - K^2)/(2 * Tibia_l * Femur_l))$
+$\theta_3 = \pi - \gamma$
+
+$Ef = (x, y, z)$ is end effector
+$Ofc$ is cartesian leg offset
+$Ofp$ is polar leg offset
 
 ## Additional resources
 * BTstack examples - https://bluekitchen-gmbh.com/btstack/develop/#examples/examples/
