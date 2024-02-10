@@ -1,10 +1,10 @@
 # Hexapod code
-* [General info](general-info)
-* [Hardware setup](hardware-setup)
-* [Firmware setup](firmware-setup)
-* [Usage](usage)
-* [Functionalities](functionalities)
-* [Additional resources](additional-resources)
+* [General info](#general-info)
+* [Hardware setup](#hardware-setup)
+* [Firmware setup](#firmware-setup)
+* [Usage](#usage)
+* [Functionalities](#functionalities)
+* [Additional resources](#additional-resources)
 
 ## General info
 This is a firmware of Hexapod robot based on Raspberry Pico microcontroller.
@@ -13,7 +13,7 @@ This is a firmware of Hexapod robot based on Raspberry Pico microcontroller.
 I have used Raspberry Pico W microcontroller and two PCA9685 connected to I2C0. Servos from right side of robot are connected to first nine channels of first PCA and servos from left side are connected to first nine channels of second PCA.
 
 ## Firmware setup
-In [defines.h](/headers/common/defines.h) file you can specify layout of your robot. For now only six-legged configuration is supported. # sign is number of leg going from 1 up to 6. When entering data you should start from back-right leg and go counterclockwise. Angles are measured in degrees and lenghts are measured in milimeters. Joint min and max angles are min and max allowed angles, calculated angles in that range are considered safe. If algorithm returns angles beyond this range robot will go into exception handling state and wait for reset. Servo min and max angles are angles that servo can obtain at min and max PWM values. They should be adjusted so that 0 angle is at position where leg is fully extended.
+In [defines.h](/Hexapod_code/headers/common/defines.h) file you can specify layout of your robot. For now only six-legged configuration is supported. # sign is number of leg going from 1 up to 6. When entering data you should start from back-right leg and go counterclockwise. Angles are measured in degrees and lenghts are measured in milimeters. Joint min and max angles are min and max allowed angles, calculated angles in that range are considered safe. If algorithm returns angles beyond this range robot will go into exception handling state and wait for reset. Servo min and max angles are angles that servo can obtain at min and max PWM values. They should be adjusted so that 0 angle is at position where leg is fully extended.
 
 ```
 //polar coordinates of leg anchor point
@@ -60,7 +60,7 @@ Rest of define values
 #define MAX_SPEED 150
 ```
 
-In [BLE.cpp](/src/BLE/BLE.cpp) file find ```sm_use_fixed_passkey_in_display_role(123456);``` line and change passkey to your liking. It is used when pairing device, which is necessary to write BLE characteristics.
+In [BLE.cpp](/Hexapod_code/src/BLE/BLE.cpp) file find ```sm_use_fixed_passkey_in_display_role(123456);``` line and change passkey to your liking. It is used when pairing device, which is necessary to write BLE characteristics.
 
 ## Usage
 To build project you need Pico SDK.
@@ -139,7 +139,7 @@ It moves legs to known positions in safe way in sets of three. First legs with e
 Currently it is similar to Init state. It moves legs to resting position in the same way that Init state moves them to known position. After finishing procedure legs stop moving and robot stays in Idle state. State is changed to Walk when input is received.
 
 #### Walk state
-In this state legs perform walk cycle. Walk state is divided into stance when leg moves on the ground and swing when leg is moving in the air. When entering state even legs are initialized to begin walk cycle and odd legs are initialized do be on 50% of walk cycle. This causes them to move in sync and creates tri-gait. other gaits can be implemented by changing percentage of walk cycle that legs start in and how long stance phase is. If microcontroller doesn't receive input for time specified in defines.h file state is switched back to Idle.
+In this state legs perform walk cycle. Walk state is divided into stance when leg moves on the ground and swing when leg is moving in the air. When entering state even legs are initialized to begin walk cycle and odd legs are initialized do be on 50% of walk cycle. This causes them to move in sync and creates tri-gait. other gaits can be implemented by changing percentage of walk cycle that legs start in and how long stance phase is. If microcontroller doesn't receive input for time specified in [defines.h](/Hexapod_code/headers/common/defines.h) file state is switched back to Idle.
 
 ### Bluetooth
 Robot uses BLE for communication. BLE specific methods are implemented according to BTstack specification and examples. BLE services and characteristics are specified in ble_hexapod.gatt file. If you want to specify new service please follow this schema:

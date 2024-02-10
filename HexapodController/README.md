@@ -1,9 +1,9 @@
 # Hexapod controller
-* [General info](general-info)
-* [Requirements](requirements)
-* [Usage](usage)
-* [Functionalities](functionalities)
-* [Additional resources](additional-resources)
+* [General info](#general-info)
+* [Requirements](#requirements)
+* [Usage](#usage)
+* [Functionalities](#functionalities)
+* [Additional resources](#additional-resources)
 
 ## General info
 This is mobile application for controlling hexapod robot
